@@ -19,8 +19,8 @@ class Stamp:
             raise ValueError("stamp packages must be sorted by canonical name")
 
 
-def get_stamp(names: list[str], *, site_packages: str) -> Stamp:
-    """Fingerprint installed distributions in canonical-name order."""
+def get_stamp(names: list[str], *, paths: list[str]) -> Stamp:
+    """Fingerprint distributions on import paths in canonical-name order."""
     if not names:
         raise ValueError("distribution names must not be empty")
 
@@ -30,7 +30,7 @@ def get_stamp(names: list[str], *, site_packages: str) -> Stamp:
             raise ValueError("distribution name must not be empty")
 
         installed = next(
-            Distribution.discover(name=name, path=[site_packages]),
+            Distribution.discover(name=name, path=paths),
             None,
         )
         if installed is None:

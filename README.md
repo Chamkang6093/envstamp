@@ -40,18 +40,20 @@ by canonical name.
 ## Python API
 
 ```python
-from sysconfig import get_path
+import sys
 
 from envstamp.stamp import get_stamp, read_stamp, write_stamp
 
 
-stamp = get_stamp(["numpy", "pandas"], site_packages=get_path("purelib"))
+stamp = get_stamp(["numpy", "pandas"], paths=sys.path)
 write_stamp("/tmp/envstamp.json", stamp)
 
 saved = read_stamp("/tmp/envstamp.json")
 for package in saved.packages:
     print(package.canonical_name, package.version, package.sha256)
 ```
+
+Pass the distribution search paths explicitly through `get_stamp(..., paths=...)`.
 
 `envstamp` supports regular, non-editable installations. It reads
 `.dist-info/direct_url.json` when present and rejects the distribution when
