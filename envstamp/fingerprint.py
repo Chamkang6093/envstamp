@@ -4,7 +4,6 @@ import hashlib
 import json
 from dataclasses import dataclass
 from importlib.metadata import Distribution, PackagePath
-from importlib.metadata import distribution as find_distribution
 from pathlib import Path, PurePosixPath
 
 FINGERPRINT_ALGORITHM = "envstamp-sha256-v1"
@@ -30,19 +29,15 @@ class DistributionFingerprint:
     count: int
 
 
-def _distribution(name: str) -> DistributionFingerprint:
+def _distribution(installed: Distribution) -> DistributionFingerprint:
     """Fingerprint the stable installed payload of a Python distribution."""
-    if not name:
-        raise ValueError("distribution name must not be empty")
-
-    installed = find_distribution(name)
-    distribution_name = installed.metadata["Name"]
-    if distribution_name is None:
-        raise FingerprintError(f"distribution {name!r} has no canonical name")
+    name = installed.metadata["Name"]
+    if name is None:
+        raise FingerprintError("distribution has no canonical name")
 
     if _is_editable(installed):
         raise FingerprintError(
-            f"distribution {distribution_name!r} is installed in editable mode"
+            f"distribution {name!r} is installed in editable mode"
         )
 
     manifest = installed.files
@@ -61,7 +56,7 @@ def _distribution(name: str) -> DistributionFingerprint:
         raise FingerprintError(f"distribution {name!r} has no stable installed files")
 
     return DistributionFingerprint(
-        name=distribution_name,
+        name=name,
         version=installed.version,
         algorithm=FINGERPRINT_ALGORITHM,
         sha256=_sha256_package(files),

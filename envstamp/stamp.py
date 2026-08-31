@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import asdict, dataclass
+from importlib.metadata import Distribution, PackageNotFoundError
 from pathlib import Path
 
 from envstamp.fingerprint import DistributionFingerprint, _distribution
@@ -18,12 +19,25 @@ class Stamp:
             raise ValueError("stamp packages must be sorted by canonical name")
 
 
-def get_stamp(names: list[str]) -> Stamp:
+def get_stamp(names: list[str], *, site_packages: str) -> Stamp:
     """Fingerprint installed distributions in canonical-name order."""
     if not names:
         raise ValueError("distribution names must not be empty")
 
-    packages = [_distribution(name) for name in names]
+    packages: list[DistributionFingerprint] = []
+    for name in names:
+        if not name:
+            raise ValueError("distribution name must not be empty")
+
+        installed = next(
+            Distribution.discover(name=name, path=[site_packages]),
+            None,
+        )
+        if installed is None:
+            raise PackageNotFoundError(name)
+
+        packages.append(_distribution(installed))
+
     packages.sort(key=lambda package: package.name.lower())
     return Stamp(packages=tuple(packages))
 

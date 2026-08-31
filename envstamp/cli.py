@@ -4,6 +4,7 @@ import argparse
 import json
 from dataclasses import asdict
 from pathlib import Path
+from sysconfig import get_path
 
 from envstamp.stamp import get_stamp, read_stamp, write_stamp
 
@@ -13,7 +14,7 @@ def main() -> None:
     arguments = parser.parse_args()
 
     if arguments.command == "get":
-        stamp = get_stamp(arguments.packages)
+        stamp = get_stamp(arguments.packages, site_packages=get_path("purelib"))
         if arguments.output is not None:
             write_stamp(arguments.output, stamp)
             return
