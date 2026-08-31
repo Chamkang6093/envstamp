@@ -28,8 +28,8 @@ jobs:
       - name: Build package
         run: uv build --no-sources
 
-      - name: Check wheel import
-        run: uv run --with dist/*.whl --no-project -- python -c "import envstamp; print(envstamp)"
+      - name: Check wheel CLI
+        run: uv run --with dist/*.whl --no-project -- envstamp --help
 
       - name: Upload package distributions
         uses: actions/upload-artifact@v4
