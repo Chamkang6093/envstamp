@@ -27,7 +27,7 @@ class DistributionFingerprint:
     version: str
     algorithm: str
     sha256: str
-    files: tuple[FileFingerprint, ...]
+    count: int
 
 
 def distribution(name: str) -> DistributionFingerprint:
@@ -65,7 +65,7 @@ def distribution(name: str) -> DistributionFingerprint:
         version=installed.version,
         algorithm=FINGERPRINT_ALGORITHM,
         sha256=_sha256_package(files),
-        files=tuple(files),
+        count=len(files),
     )
 
 
