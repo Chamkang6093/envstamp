@@ -8,7 +8,7 @@ packages = ["envstamp"]
 [project]
 name = "envstamp"
 version = "0.1.0"
-description = "Atomic runtime state records and reproducible Python distribution fingerprints."
+description = "Atomic, reproducible fingerprints of installed Python distributions."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
@@ -16,14 +16,18 @@ license-files = ["LICENSE"]
 authors = [
   { name = "Cham" },
 ]
-keywords = ["runtime-state", "fingerprint", "reproducibility"]
+keywords = ["installed-packages", "version-tracking", "content-hashing"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
+  "Operating System :: POSIX",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = []
+
+[project.scripts]
+envstamp = "envstamp.cli:main"
 
 [project.urls]
 Repository = "https://github.com/Chamkang6093/envstamp"
