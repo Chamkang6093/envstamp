@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass
 from importlib.metadata import Distribution, PackagePath
 from importlib.metadata import distribution as find_distribution
@@ -39,6 +40,11 @@ def distribution(name: str) -> DistributionFingerprint:
     if distribution_name is None:
         raise FingerprintError(f"distribution {name!r} has no canonical name")
 
+    if _is_editable(installed):
+        raise FingerprintError(
+            f"distribution {distribution_name!r} is installed in editable mode"
+        )
+
     manifest = installed.files
     if manifest is None:
         raise FingerprintError(f"distribution {name!r} has no installed file manifest")
@@ -61,6 +67,29 @@ def distribution(name: str) -> DistributionFingerprint:
         sha256=_sha256_package(files),
         files=tuple(files),
     )
+
+
+def _is_editable(installed: Distribution) -> bool:
+    direct_url = installed.read_text("direct_url.json")
+    if direct_url is None:
+        return False
+
+    metadata = json.loads(direct_url)
+    if not isinstance(metadata, dict):
+        raise FingerprintError("direct_url.json must contain a JSON object")
+    if "dir_info" not in metadata:
+        return False
+
+    dir_info = metadata["dir_info"]
+    if not isinstance(dir_info, dict):
+        raise FingerprintError("direct_url.json dir_info must be a JSON object")
+    if "editable" not in dir_info:
+        return False
+
+    editable = dir_info["editable"]
+    if not isinstance(editable, bool):
+        raise FingerprintError("direct_url.json editable must be a boolean")
+    return editable
 
 
 def _manifest_file(installed: Distribution, manifest_file: PackagePath) -> FileFingerprint | None:
