@@ -30,7 +30,7 @@ def get_stamp(names: list[str], *, paths: list[str]) -> Stamp:
             raise ValueError("distribution name must not be empty")
 
         installed = next(
-            Distribution.discover(name=name, path=paths),
+            iter(Distribution.discover(name=name, path=paths)),
             None,
         )
         if installed is None:
