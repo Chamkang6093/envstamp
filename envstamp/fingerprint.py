@@ -30,7 +30,7 @@ class DistributionFingerprint:
     count: int
 
 
-def distribution(name: str) -> DistributionFingerprint:
+def _distribution(name: str) -> DistributionFingerprint:
     """Fingerprint the stable installed payload of a Python distribution."""
     if not name:
         raise ValueError("distribution name must not be empty")
