@@ -22,7 +22,7 @@ class FileFingerprint:
 
 @dataclass(frozen=True, slots=True)
 class DistributionFingerprint:
-    name: str
+    canonical_name: str
     version: str
     algorithm: str
     sha256: str
@@ -56,7 +56,7 @@ def _distribution(installed: Distribution) -> DistributionFingerprint:
         raise FingerprintError(f"distribution {name!r} has no stable installed files")
 
     return DistributionFingerprint(
-        name=name,
+        canonical_name=name,
         version=installed.version,
         algorithm=FINGERPRINT_ALGORITHM,
         sha256=_sha256_package(files),

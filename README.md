@@ -50,7 +50,7 @@ write_stamp("/tmp/envstamp.json", stamp)
 
 saved = read_stamp("/tmp/envstamp.json")
 for package in saved.packages:
-    print(package.name, package.version, package.sha256)
+    print(package.canonical_name, package.version, package.sha256)
 ```
 
 `envstamp` supports regular, non-editable installations. It reads

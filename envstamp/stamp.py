@@ -14,7 +14,7 @@ class Stamp:
     packages: tuple[DistributionFingerprint, ...]
 
     def __post_init__(self) -> None:
-        names = tuple(package.name.lower() for package in self.packages)
+        names = tuple(package.canonical_name.lower() for package in self.packages)
         if names != tuple(sorted(names)):
             raise ValueError("stamp packages must be sorted by canonical name")
 
@@ -38,7 +38,7 @@ def get_stamp(names: list[str], *, site_packages: str) -> Stamp:
 
         packages.append(_distribution(installed))
 
-    packages.sort(key=lambda package: package.name.lower())
+    packages.sort(key=lambda package: package.canonical_name.lower())
     return Stamp(packages=tuple(packages))
 
 
