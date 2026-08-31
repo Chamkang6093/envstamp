@@ -12,7 +12,7 @@ def main() -> None:
     parser = _build_parser()
     arguments = parser.parse_args()
 
-    if arguments.command == "fingerprint":
+    if arguments.command == "get":
         stamp = get_stamp(arguments.packages)
         if arguments.output is not None:
             write_stamp(arguments.output, stamp)
@@ -40,12 +40,12 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     commands = parser.add_subparsers(dest="command", required=True)
 
-    fingerprint_parser = commands.add_parser(
-        "fingerprint",
-        help="fingerprint installed distributions",
+    get_parser = commands.add_parser(
+        "get",
+        help="get a stamp of installed distributions",
     )
-    fingerprint_parser.add_argument("packages", nargs="+")
-    fingerprint_parser.add_argument(
+    get_parser.add_argument("packages", nargs="+")
+    get_parser.add_argument(
         "--output",
         type=Path,
         help="atomically write the stamp to this path",
