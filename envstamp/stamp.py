@@ -12,14 +12,25 @@ from envstamp.fingerprint import DistributionFingerprint, _distribution
 @dataclass(frozen=True, slots=True)
 class Stamp:
     packages: tuple[DistributionFingerprint, ...]
+    metadata: dict[str, str]
 
     def __post_init__(self) -> None:
+        if not isinstance(self.metadata, dict) or not all(
+            isinstance(key, str) and isinstance(value, str)
+            for key, value in self.metadata.items()
+        ):
+            raise TypeError("stamp metadata must contain string keys and values")
+
+        metadata_keys = tuple(self.metadata)
+        if metadata_keys != tuple(sorted(metadata_keys)):
+            raise ValueError("stamp metadata must be sorted by key")
+
         names = tuple(package.canonical_name.lower() for package in self.packages)
         if names != tuple(sorted(names)):
             raise ValueError("stamp packages must be sorted by canonical name")
 
 
-def get_stamp(names: list[str], *, paths: list[str]) -> Stamp:
+def get_stamp(names: list[str], *, paths: list[str], metadata: dict[str, str]) -> Stamp:
     """Fingerprint distributions on import paths in canonical-name order."""
     if not names:
         raise ValueError("distribution names must not be empty")
@@ -39,7 +50,8 @@ def get_stamp(names: list[str], *, paths: list[str]) -> Stamp:
         packages.append(_distribution(installed))
 
     packages.sort(key=lambda package: package.canonical_name.lower())
-    return Stamp(packages=tuple(packages))
+    metadata = dict(sorted(metadata.items(), key=lambda item: item[0]))
+    return Stamp(packages=tuple(packages), metadata=metadata)
 
 
 def read_stamp(file: str | Path) -> Stamp:
@@ -51,7 +63,7 @@ def read_stamp(file: str | Path) -> Stamp:
     packages = tuple(
         DistributionFingerprint(**package) for package in value["packages"]
     )
-    return Stamp(packages=packages)
+    return Stamp(packages=packages, metadata=value["metadata"])
 
 
 def write_stamp(path: str | Path, stamp: Stamp) -> None:

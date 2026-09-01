@@ -27,6 +27,17 @@ Search explicit distribution paths:
 envstamp get numpy pandas --paths /path/to/site-packages
 ```
 
+Attach string metadata by repeating `--metadata`:
+
+```bash
+envstamp get numpy pandas \
+    --metadata service=worker \
+    --metadata environment=production
+```
+
+Every stamp contains a metadata object, which may be empty. Its keys and values are strings, keys
+are stored in sorted order, and repeated CLI keys are rejected.
+
 Atomically write the stamp to a file:
 
 ```bash
@@ -51,7 +62,11 @@ import sys
 from envstamp.stamp import get_stamp, read_stamp, write_stamp
 
 
-stamp = get_stamp(["numpy", "pandas"], paths=sys.path)
+stamp = get_stamp(
+    ["numpy", "pandas"],
+    paths=sys.path,
+    metadata={"service": "worker", "environment": "production"},
+)
 write_stamp("/tmp/envstamp.json", stamp)
 
 saved = read_stamp("/tmp/envstamp.json")
@@ -60,6 +75,7 @@ for package in saved.packages:
 ```
 
 Pass the distribution search paths explicitly through `get_stamp(..., paths=...)`.
+Metadata does not participate in package content hashes.
 
 `envstamp` supports regular, non-editable installations. It reads
 `.dist-info/direct_url.json` when present and rejects the distribution when

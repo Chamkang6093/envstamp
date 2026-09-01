@@ -14,7 +14,20 @@ def main() -> None:
     arguments = parser.parse_args()
 
     if arguments.command == "get":
-        stamp = get_stamp(arguments.packages, paths=arguments.paths)
+        metadata: dict[str, str] = {}
+        for item in arguments.metadata:
+            key, separator, value = item.partition("=")
+            if not separator:
+                parser.error("metadata must use KEY=VALUE")
+            if key in metadata:
+                parser.error(f"metadata key must not repeat: {key}")
+            metadata[key] = value
+
+        stamp = get_stamp(
+            arguments.packages,
+            paths=arguments.paths,
+            metadata=metadata,
+        )
         if arguments.output is not None:
             write_stamp(arguments.output, stamp)
             return
@@ -51,6 +64,13 @@ def _build_parser() -> argparse.ArgumentParser:
         nargs="+",
         default=sys.path,
         help="distribution search paths; defaults to the current sys.path",
+    )
+    get_parser.add_argument(
+        "--metadata",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="add string metadata; may be repeated",
     )
     get_parser.add_argument(
         "--output",
