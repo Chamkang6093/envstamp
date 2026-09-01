@@ -85,20 +85,25 @@ def write_stamp(path: str | Path, stamp: Stamp) -> None:
     stamp_path = Path(path)
     stamp_path.parent.mkdir(parents=True, exist_ok=True)
     stamp_path.parent.chmod(0o755)
-    temporary_path = stamp_path.with_name(f".{stamp_path.name}.tmp")
-    with temporary_path.open("w", encoding="utf-8") as temporary_file:
-        json.dump(
-            asdict(stamp),
-            temporary_file,
-            ensure_ascii=False,
-            allow_nan=False,
-            indent=2,
-            sort_keys=True,
-        )
-        temporary_file.write("\n")
-        temporary_file.flush()
-        os.fsync(temporary_file.fileno())
-        os.fchmod(temporary_file.fileno(), 0o444)
 
-    # Atomic on POSIX when both paths are on the same filesystem.
-    os.replace(temporary_path, stamp_path)
+    temporary_path = stamp_path.with_name(f".{stamp_path.name}.tmp")
+    temporary_path.unlink(missing_ok=True)
+    try:
+        with temporary_path.open("w", encoding="utf-8") as temporary_file:
+            json.dump(
+                asdict(stamp),
+                temporary_file,
+                ensure_ascii=False,
+                allow_nan=False,
+                indent=2,
+                sort_keys=True,
+            )
+            temporary_file.write("\n")
+            temporary_file.flush()
+            os.fsync(temporary_file.fileno())
+            os.fchmod(temporary_file.fileno(), 0o444)
+
+        # Atomic on POSIX when both paths are on the same filesystem.
+        os.replace(temporary_path, stamp_path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
