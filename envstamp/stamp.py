@@ -6,7 +6,11 @@ from dataclasses import asdict, dataclass
 from importlib.metadata import Distribution, PackageNotFoundError
 from pathlib import Path
 
-from envstamp.fingerprint import DistributionFingerprint, _distribution
+from envstamp.fingerprint import (
+    DistributionFingerprint,
+    FingerprintError,
+    _distribution,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -31,6 +35,16 @@ class Stamp:
 
 
 def get_stamp(names: list[str], *, paths: list[str], metadata: dict[str, str]) -> Stamp:
+    """Return a stable stamp from two matching fingerprints."""
+    first = _get_stamp(names, paths, metadata)
+    second = _get_stamp(names, paths, metadata)
+    if first != second:
+        raise FingerprintError("installed distributions changed while fingerprinting")
+
+    return second
+
+
+def _get_stamp(names: list[str], paths: list[str], metadata: dict[str, str]) -> Stamp:
     """Fingerprint distributions on import paths in canonical-name order."""
     if not names:
         raise ValueError("distribution names must not be empty")

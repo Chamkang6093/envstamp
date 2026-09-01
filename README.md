@@ -96,6 +96,10 @@ fingerprinting fails instead of silently producing a partial digest.
 File paths are sorted before the package digest hashes the protocol tag followed by
 `path\0sha256\0size\n` records. The read buffer size does not affect the resulting digest.
 
+`get_stamp()` fingerprints the complete package set twice and only returns when both results are
+identical. If the installed environment changes while the stamp is being generated, it raises
+`FingerprintError` instead of returning a mixed snapshot.
+
 ## Atomic writes
 
 Each stamp file belongs to one writer and contains one complete stamp. A write creates a
