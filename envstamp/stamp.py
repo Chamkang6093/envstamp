@@ -83,8 +83,13 @@ def read_stamp(file: str | Path) -> Stamp:
 def write_stamp(path: str | Path, stamp: Stamp) -> None:
     """Atomically replace a single-writer stamp file."""
     stamp_path = Path(path)
-    stamp_path.parent.mkdir(parents=True, exist_ok=True)
-    stamp_path.parent.chmod(0o755)
+    try:
+        stamp_path.parent.mkdir(parents=True)
+    except FileExistsError:
+        if not stamp_path.parent.is_dir():
+            raise
+    else:
+        stamp_path.parent.chmod(0o755)
 
     temporary_path = stamp_path.with_name(f".{stamp_path.name}.tmp")
     temporary_path.unlink(missing_ok=True)

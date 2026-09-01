@@ -106,3 +106,6 @@ Each stamp file belongs to one writer and contains one complete stamp. A write c
 same-directory temporary file, flushes it, and atomically replaces the previous stamp file.
 On POSIX, readers therefore observe either the previous complete stamp or the new complete stamp.
 Concurrent writers to the same path are not supported; use a separate file for each process.
+When the stamp's parent directory does not exist, `envstamp` creates it with mode `0755`; existing
+directories keep their current permissions. Completed stamp files use mode `0444`. Failed writes
+remove their temporary file, and the next write removes any temporary file left by interruption.
