@@ -7,7 +7,7 @@ packages = ["envstamp"]
 
 [project]
 name = "envstamp"
-version = "0.1.2"
+version = "0.1.3"
 description = "Atomic, reproducible fingerprints of installed Python distributions."
 readme = "README.md"
 requires-python = ">=3.12"
