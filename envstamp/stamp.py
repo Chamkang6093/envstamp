@@ -84,6 +84,7 @@ def write_stamp(path: str | Path, stamp: Stamp) -> None:
     """Atomically replace a single-writer stamp file."""
     stamp_path = Path(path)
     stamp_path.parent.mkdir(parents=True, exist_ok=True)
+    stamp_path.parent.chmod(0o755)
     temporary_path = stamp_path.with_name(f".{stamp_path.name}.tmp")
     with temporary_path.open("w", encoding="utf-8") as temporary_file:
         json.dump(
@@ -97,6 +98,7 @@ def write_stamp(path: str | Path, stamp: Stamp) -> None:
         temporary_file.write("\n")
         temporary_file.flush()
         os.fsync(temporary_file.fileno())
+        os.fchmod(temporary_file.fileno(), 0o444)
 
     # Atomic on POSIX when both paths are on the same filesystem.
     os.replace(temporary_path, stamp_path)
