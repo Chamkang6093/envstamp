@@ -19,7 +19,7 @@ def main() -> None:
             write_stamp(arguments.output, stamp)
             return
     elif arguments.command == "read":
-        stamp = read_stamp(arguments.path)
+        stamp = read_stamp(arguments.file)
     else:
         raise AssertionError(f"unknown command: {arguments.command!r}")
 
@@ -58,6 +58,6 @@ def _build_parser() -> argparse.ArgumentParser:
         help="atomically write the stamp to this path",
     )
     read_parser = commands.add_parser("read", help="read one stamp")
-    read_parser.add_argument("path", type=Path)
+    read_parser.add_argument("file", type=Path)
 
     return parser

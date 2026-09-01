@@ -42,9 +42,9 @@ def get_stamp(names: list[str], *, paths: list[str]) -> Stamp:
     return Stamp(packages=tuple(packages))
 
 
-def read_stamp(path: str | Path) -> Stamp:
+def read_stamp(file: str | Path) -> Stamp:
     """Read one stamp from a file."""
-    value = json.loads(Path(path).read_text(encoding="utf-8"))
+    value = json.loads(Path(file).read_text(encoding="utf-8"))
     if not isinstance(value, dict):
         raise TypeError("stamp must be a JSON object")
 
