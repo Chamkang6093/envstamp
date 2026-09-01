@@ -21,6 +21,12 @@ Get a stamp for one or more installed distributions and print it:
 envstamp get numpy pandas
 ```
 
+Search explicit distribution paths:
+
+```bash
+envstamp get numpy pandas --paths /path/to/site-packages
+```
+
 Atomically write the stamp to a file:
 
 ```bash

@@ -14,7 +14,7 @@ def main() -> None:
     arguments = parser.parse_args()
 
     if arguments.command == "get":
-        stamp = get_stamp(arguments.packages, paths=sys.path)
+        stamp = get_stamp(arguments.packages, paths=arguments.paths)
         if arguments.output is not None:
             write_stamp(arguments.output, stamp)
             return
@@ -46,6 +46,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="get a stamp of installed distributions",
     )
     get_parser.add_argument("packages", nargs="+")
+    get_parser.add_argument(
+        "--paths",
+        nargs="+",
+        default=sys.path,
+        help="distribution search paths; defaults to the current sys.path",
+    )
     get_parser.add_argument(
         "--output",
         type=Path,
