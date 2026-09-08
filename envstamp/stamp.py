@@ -11,6 +11,7 @@ from envstamp.fingerprint import (
     FINGERPRINT_ALGORITHM,
     FingerprintError,
     _distribution,
+    _sha256_packages,
 )
 
 
@@ -51,7 +52,7 @@ def _get_stamp(names: list[str], paths: list[str], metadata: dict[str, str]) -> 
     if not names:
         raise ValueError("distribution names must not be empty")
 
-    packages: list[DistributionFingerprint] = []
+    collected_packages: list[DistributionFingerprint] = []
     for name in names:
         if not name:
             raise ValueError("distribution name must not be empty")
@@ -63,13 +64,17 @@ def _get_stamp(names: list[str], paths: list[str], metadata: dict[str, str]) -> 
         if installed is None:
             raise PackageNotFoundError(name)
 
-        packages.append(_distribution(installed))
+        collected_packages.append(_distribution(installed))
 
-    packages.sort(key=lambda package: package.canonical_name.lower())
+    collected_packages.sort(key=lambda package: package.canonical_name.lower())
+    packages = tuple(collected_packages)
     metadata = dict(sorted(metadata.items(), key=lambda item: item[0]))
     return Stamp(
-        fingerprint={"algorithm": FINGERPRINT_ALGORITHM},
-        packages=tuple(packages),
+        fingerprint={
+            "algorithm": FINGERPRINT_ALGORITHM,
+            "sha256": _sha256_packages(packages),
+        },
+        packages=packages,
         metadata=metadata,
     )
 
