@@ -24,7 +24,6 @@ class FileFingerprint:
 class DistributionFingerprint:
     canonical_name: str
     version: str
-    algorithm: str
     sha256: str
     count: int
 
@@ -58,7 +57,6 @@ def _distribution(installed: Distribution) -> DistributionFingerprint:
     return DistributionFingerprint(
         canonical_name=name,
         version=installed.version,
-        algorithm=FINGERPRINT_ALGORITHM,
         sha256=_sha256_package(files),
         count=len(files),
     )

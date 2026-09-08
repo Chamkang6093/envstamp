@@ -8,6 +8,7 @@ from pathlib import Path
 
 from envstamp.fingerprint import (
     DistributionFingerprint,
+    FINGERPRINT_ALGORITHM,
     FingerprintError,
     _distribution,
 )
@@ -15,6 +16,7 @@ from envstamp.fingerprint import (
 
 @dataclass(frozen=True, slots=True)
 class Stamp:
+    fingerprint: dict[str, str]
     packages: tuple[DistributionFingerprint, ...]
     metadata: dict[str, str]
 
@@ -65,7 +67,11 @@ def _get_stamp(names: list[str], paths: list[str], metadata: dict[str, str]) -> 
 
     packages.sort(key=lambda package: package.canonical_name.lower())
     metadata = dict(sorted(metadata.items(), key=lambda item: item[0]))
-    return Stamp(packages=tuple(packages), metadata=metadata)
+    return Stamp(
+        fingerprint={"algorithm": FINGERPRINT_ALGORITHM},
+        packages=tuple(packages),
+        metadata=metadata,
+    )
 
 
 def read_stamp(file: str | Path) -> Stamp:
@@ -77,7 +83,11 @@ def read_stamp(file: str | Path) -> Stamp:
     packages = tuple(
         DistributionFingerprint(**package) for package in value["packages"]
     )
-    return Stamp(packages=packages, metadata=value["metadata"])
+    return Stamp(
+        fingerprint=value["fingerprint"],
+        packages=packages,
+        metadata=value["metadata"],
+    )
 
 
 def write_stamp(path: str | Path, stamp: Stamp) -> None:
