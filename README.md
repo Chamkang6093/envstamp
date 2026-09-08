@@ -50,9 +50,10 @@ Read the saved stamp:
 envstamp read /tmp/envstamp.json
 ```
 
-Each package record contains its canonical name, installed version, fingerprint algorithm,
-package-level SHA-256, and the number of files included in that digest. Package records are sorted
-by canonical name.
+Each stamp's top-level fingerprint contains the algorithm and aggregate SHA-256 of its package
+records. Each package record contains its canonical name, installed version, package-level
+SHA-256, and the number of files included in that digest. Package records are sorted by canonical
+name.
 
 ## Python API
 
@@ -70,12 +71,13 @@ stamp = get_stamp(
 write_stamp("/tmp/envstamp.json", stamp)
 
 saved = read_stamp("/tmp/envstamp.json")
+print(saved.fingerprint["sha256"])
 for package in saved.packages:
     print(package.canonical_name, package.version, package.sha256)
 ```
 
 Pass the distribution search paths explicitly through `get_stamp(..., paths=...)`.
-Metadata does not participate in package content hashes.
+Metadata does not participate in package or stamp content hashes.
 
 `envstamp` supports regular, non-editable installations. It reads
 `.dist-info/direct_url.json` when present and rejects the distribution when
@@ -95,6 +97,9 @@ fingerprinting fails instead of silently producing a partial digest.
 
 File paths are sorted before the package digest hashes the protocol tag followed by
 `path\0sha256\0size\n` records. The read buffer size does not affect the resulting digest.
+
+Package records are sorted before the stamp digest hashes the protocol tag followed by
+`name\0version\0sha256\0count\n` records.
 
 `get_stamp()` fingerprints the complete package set twice and only returns when both results are
 identical. If the installed environment changes while the stamp is being generated, it raises
