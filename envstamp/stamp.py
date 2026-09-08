@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from dataclasses import asdict, dataclass
@@ -11,7 +12,6 @@ from envstamp.fingerprint import (
     FINGERPRINT_ALGORITHM,
     FingerprintError,
     _distribution,
-    _sha256_packages,
 )
 
 
@@ -35,6 +35,24 @@ class Stamp:
         names = tuple(package.canonical_name.lower() for package in self.packages)
         if names != tuple(sorted(names)):
             raise ValueError("stamp packages must be sorted by canonical name")
+
+
+def _sha256_packages(packages: tuple[DistributionFingerprint, ...]) -> str:
+    """Hash the protocol tag and sorted ``name\\0version\\0sha256\\0count\\n`` records."""
+    digest = hashlib.sha256()
+    digest.update(FINGERPRINT_ALGORITHM.encode("ascii"))
+    digest.update(b"\0")
+    for package in packages:
+        digest.update(package.canonical_name.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(package.version.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(package.sha256.encode("ascii"))
+        digest.update(b"\0")
+        digest.update(str(package.count).encode("ascii"))
+        digest.update(b"\n")
+
+    return digest.hexdigest()
 
 
 def get_stamp(names: list[str], *, paths: list[str], metadata: dict[str, str]) -> Stamp:

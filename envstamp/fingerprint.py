@@ -143,21 +143,3 @@ def _sha256_package(files: list[FileFingerprint]) -> str:
         digest.update(b"\n")
 
     return digest.hexdigest()
-
-
-def _sha256_packages(packages: tuple[DistributionFingerprint, ...]) -> str:
-    """Hash the protocol tag and sorted ``name\\0version\\0sha256\\0count\\n`` records."""
-    digest = hashlib.sha256()
-    digest.update(FINGERPRINT_ALGORITHM.encode("ascii"))
-    digest.update(b"\0")
-    for package in packages:
-        digest.update(package.canonical_name.encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(package.version.encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(package.sha256.encode("ascii"))
-        digest.update(b"\0")
-        digest.update(str(package.count).encode("ascii"))
-        digest.update(b"\n")
-
-    return digest.hexdigest()
