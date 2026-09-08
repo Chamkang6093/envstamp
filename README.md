@@ -86,10 +86,15 @@ stable installed payload.
 
 ## Fingerprint protocol
 
-The `envstamp-sha256-v1` algorithm starts from each installed distribution manifest, but only
-includes entries that resolve inside its installation root, normally `site-packages`. This covers
-Python code, native libraries such as `.so` and `.pyd`, and package data. Distribution metadata,
-bytecode caches, `.pth` and `.egg-link` path files, launch scripts, and external data are excluded.
+The `envstamp-sha256-v1` algorithm produces a content fingerprint for each package and an
+aggregate fingerprint for the complete package set.
+
+### Package fingerprint
+
+A package fingerprint starts from its installed distribution manifest, but only includes entries
+that resolve inside its installation root, normally `site-packages`. This covers Python code,
+native libraries such as `.so` and `.pyd`, and package data. Distribution metadata, bytecode
+caches, `.pth` and `.egg-link` path files, launch scripts, and external data are excluded.
 
 RECORD hashes are not used as an inclusion filter. When an included entry has no RECORD hash,
 `envstamp` still reads and hashes the installed file directly. If that file is missing,
@@ -98,8 +103,11 @@ fingerprinting fails instead of silently producing a partial digest.
 File paths are sorted before the package digest hashes the protocol tag followed by
 `path\0sha256\0size\n` records. The read buffer size does not affect the resulting digest.
 
-Package records are sorted before the stamp digest hashes the protocol tag followed by
-`name\0version\0sha256\0count\n` records.
+### Stamp fingerprint
+
+Package records are sorted by canonical name before the stamp digest hashes the protocol tag
+followed by `name\0version\0sha256\0count\n` records. The resulting algorithm and aggregate digest
+are stored in `fingerprint.algorithm` and `fingerprint.sha256`.
 
 `get_stamp()` fingerprints the complete package set twice and only returns when both results are
 identical. If the installed environment changes while the stamp is being generated, it raises
