@@ -50,6 +50,15 @@ Read the saved stamp:
 envstamp read /tmp/envstamp.json
 ```
 
+Print package names and versions on one line in canonical-name order:
+
+```bash
+envstamp get numpy pandas --summary
+# numpy==2.5.3, pandas==3.0.6
+```
+
+`--summary` and `--output` are mutually exclusive.
+
 Each stamp's top-level fingerprint contains the algorithm and aggregate SHA-256 of its package
 records. Each package record contains its canonical name, installed version, package-level
 SHA-256, and the number of files included in that digest. Package records are sorted by canonical
@@ -71,6 +80,7 @@ stamp = get_stamp(
 write_stamp("/tmp/envstamp.json", stamp)
 
 saved = read_stamp("/tmp/envstamp.json")
+print(saved.summary)
 print(saved.fingerprint["sha256"])
 for package in saved.packages:
     print(package.canonical_name, package.version, package.sha256)
