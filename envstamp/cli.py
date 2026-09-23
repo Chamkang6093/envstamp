@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
-from dataclasses import asdict
 from pathlib import Path
 
 from envstamp.stamp import get_stamp, read_stamp, write_stamp
@@ -14,6 +12,9 @@ def main() -> None:
     arguments = parser.parse_args()
 
     if arguments.command == "get":
+        if arguments.summary and arguments.output is not None:
+            parser.error("--summary and --output are mutually exclusive")
+
         metadata: dict[str, str] = {}
         for item in arguments.metadata:
             key, separator, value = item.partition("=")
@@ -28,23 +29,17 @@ def main() -> None:
             paths=arguments.paths,
             metadata=metadata,
         )
-        if arguments.output is not None:
+        if arguments.summary:
+            print(stamp.summary)
+        elif arguments.output is not None:
             write_stamp(arguments.output, stamp)
-            return
+        else:
+            print(stamp)
     elif arguments.command == "read":
         stamp = read_stamp(arguments.file)
+        print(stamp)
     else:
         raise AssertionError(f"unknown command: {arguments.command!r}")
-
-    print(
-        json.dumps(
-            asdict(stamp),
-            ensure_ascii=False,
-            allow_nan=False,
-            indent=2,
-            sort_keys=True,
-        )
-    )
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -76,6 +71,11 @@ def _build_parser() -> argparse.ArgumentParser:
         "--output",
         type=Path,
         help="atomically write the stamp to this path",
+    )
+    get_parser.add_argument(
+        "--summary",
+        action="store_true",
+        help="print a one-line version summary of the collected stamp",
     )
     read_parser = commands.add_parser("read", help="read one stamp")
     read_parser.add_argument("file", type=Path)

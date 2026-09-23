@@ -36,6 +36,22 @@ class Stamp:
         if names != tuple(sorted(names)):
             raise ValueError("stamp packages must be sorted by canonical name")
 
+    def __str__(self) -> str:
+        return json.dumps(
+            asdict(self),
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=2,
+            sort_keys=True,
+        )
+
+    @property
+    def summary(self) -> str:
+        return ", ".join(
+            f"{package.canonical_name}=={package.version}"
+            for package in self.packages
+        )
+
 
 def _sha256_packages(packages: tuple[DistributionFingerprint, ...]) -> str:
     """Hash the protocol tag and sorted ``name\\0version\\0sha256\\0count\\n`` records."""
